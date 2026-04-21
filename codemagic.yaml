@@ -1,4 +1,3 @@
-# Final Configuration for UofK Chem App
 workflows:
   react-native-android:
     name: React Native Android Build
@@ -8,7 +7,7 @@ workflows:
       android_signing:
         - keystore_reference
       vars:
-        PACKAGE_NAME: "your.package.name" # استبدله باسم الحزمة الخاص بك
+        PACKAGE_NAME: "com.abuk10252.uofkchem"
       node: v20
     scripts:
       - name: Install dependencies
@@ -17,20 +16,24 @@ workflows:
           yarn install
       - name: Expo Prebuild
         script: |
-          # توليد مجلد android المفقود تلقائياً
           npx expo prebuild --platform android --non-interactive
       - name: Configure Android Project
         script: |
-          # إعداد مسار الـ SDK
           echo "sdk.dir=$ANDROID_SDK_ROOT" > android/local.properties
-          
-          # حل مشكلة Worklets: تفعيل المعمارية الجديدة
           echo "newArchEnabled=true" >> android/gradle.properties
       - name: Build Android APK
         script: |
           cd android
           chmod +x gradlew
           ./gradlew clean
-          # تم تغييرها لـ assembleDebug لضمان نجاح البناء وتخطي مشاكل التوقيع حالياً
-          ./gradlew assembleDebug \
-            -P
+          ./gradlew assembleDebug -PversionCode=$BUILD_NUMBER -PversionName=1.0.$BUILD_NUMBER
+    artifacts:
+      - android/app/build/outputs/apk/debug/*.apk
+    publishing:
+      email:
+        recipients:
+          - abuk10252@gmail.com
+        notify:
+          success: true
+          failure: true
+          
