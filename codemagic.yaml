@@ -3,33 +3,26 @@ workflows:
     name: React Native Android Build
     max_build_duration: 120
     instance_type: mac_mini_m2
-    environment:
-      node: v20
     scripts:
       - name: Install dependencies
-        script: |
-          nvm use 20
-          yarn install
+        script: yarn install
       - name: Expo Prebuild
         script: |
+          # توليد مجلد أندرويد من الصفر
           npx expo prebuild --platform android --non-interactive
-      - name: Configure Gradle
+      - name: Fix New Architecture
         script: |
-          # تفعيل المعمارية الجديدة داخل ملفات الأندرويد إجبارياً
+          # إجبار تفعيل المعمارية الجديدة داخل المجلد المولّد
+          sed -i '' 's/newArchEnabled=false/newArchEnabled=true/g' android/gradle.properties
           echo "newArchEnabled=true" >> android/gradle.properties
       - name: Build Android APK
         script: |
           cd android
           chmod +x gradlew
           ./gradlew assembleDebug -PversionCode=$BUILD_NUMBER -PversionName=1.0.$BUILD_NUMBER
-      - name: Finalize APK
+      - name: Export APK
         script: |
-          # الخطأ الأخير كان هنا، صلحنا المسار عشان التسمية تنجح
           cp android/app/build/outputs/apk/debug/app-debug.apk android/app/build/outputs/apk/debug/UofK_Chem.apk
     artifacts:
       - android/app/build/outputs/apk/debug/UofK_Chem.apk
-    publishing:
-      email:
-        recipients:
-          - abuk10252@gmail.com
-          
+      
