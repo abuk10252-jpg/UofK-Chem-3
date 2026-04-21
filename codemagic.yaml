@@ -28,8 +28,9 @@ workflows:
             # Path for the generated APK file
             - android/app/build/outputs/apk/release/*.apk
         publishing:
-          email: abuker10252@gmail.com
+          email:
             recipients:
+                abuker10252@gmail.com
               - your-email@example.com # ضع ايميلك هنا لتستلم الرابط
             notify:
               success: true
