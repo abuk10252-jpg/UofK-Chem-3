@@ -9,7 +9,7 @@ workflows:
             - keystore_reference # This refers to your uploaded keystore in Codemagic UI
           vars:
             PACKAGE_NAME: "your.package.name" # Change this to your app package name
-          node: v19.7.0
+          node: v20
         scripts:
             - name: Install dependencies
               script: |
