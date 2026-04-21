@@ -7,7 +7,7 @@
     "icon": "./assets/images/icon.png",
     "scheme": "uofkchem",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
+    "newArchEnabled": false, // *** نرجع نقفلها هنا ***
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.abuk10252.uofkchem"
@@ -17,7 +17,7 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#002147"
       },
-      "edgeToEdgeEnabled": true,
+      "edgeToEdgeEnabled": false, // *** نقفلها هنا عشان اللوجو ينزل ***
       "package": "com.abuk10252.uofkchem"
     },
     "web": {
@@ -32,7 +32,7 @@
         {
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 200,
-          "resizeMode": "cover",
+          "resizeMode": "contain", // *** نرجعها contain عشان الصورة ما تتمدد ***
           "backgroundColor": "#002147"
         }
       ],
