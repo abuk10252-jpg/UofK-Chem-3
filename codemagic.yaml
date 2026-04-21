@@ -1,4 +1,4 @@
-# Updated for Direct APK Download
+# Updated for Direct APK Download - UofK Chem App
 workflows:
   react-native-android:
     name: React Native Android Build
@@ -6,22 +6,26 @@ workflows:
     instance_type: mac_mini_m2
     environment:
       android_signing:
-        - keystore_reference
+        - keystore_reference # تأكد من رفع ملف الـ keystore في إعدادات Codemagic
       vars:
-        PACKAGE_NAME: "your.package.name" # غير اسم الحزمة هنا
+        PACKAGE_NAME: "your.package.name" # استبدله باسم الحزمة الخاص بتطبيقك
       node: v20
     scripts:
       - name: Install dependencies
         script: |
           nvm use 20
           yarn install
+      - name: Expo Prebuild
+        script: |
+          # هذه الخطوة مهمة جداً لأن مجلد android غير موجود في المستودع
+          npx expo prebuild --platform android --non-interactive
       - name: Set Android SDK location
         script: |
+          # إنشاء ملف الإعدادات داخل مجلد أندرويد المنشأ حديثاً
           echo "sdk.dir=$ANDROID_SDK_ROOT" > android/local.properties
       - name: Build Android APK
         script: |
           cd android
-          echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
           chmod +x gradlew
           ./gradlew assembleRelease \
             -PversionCode=$BUILD_NUMBER \
@@ -31,7 +35,7 @@ workflows:
     publishing:
       email:
         recipients:
-          - your-email@example.com # ضع ايميلك هنا
+          - your-email@example.com # ضع بريدك الإلكتروني هنا لتصلك النسخة
         notify:
           success: true
           failure: true
