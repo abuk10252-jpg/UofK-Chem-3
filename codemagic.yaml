@@ -27,7 +27,7 @@ workflows:
         script: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleRelease \
+          ./gradlew assembleDebug \
             -PversionCode=$BUILD_NUMBER \
             -PversionName=1.0.$BUILD_NUMBER
     artifacts:
