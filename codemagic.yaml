@@ -20,13 +20,19 @@ workflows:
       - name: Configure Android Project
         script: |
           echo "sdk.dir=$ANDROID_SDK_ROOT" > android/local.properties
+          # تفعيل المعمارية الجديدة إجبارياً لإرضاء المكتبات
+          cd android && echo "newArchEnabled=true" >> gradle.properties
       - name: Build Android APK
         script: |
           cd android
           chmod +x gradlew
           ./gradlew assembleDebug -PversionCode=$BUILD_NUMBER -PversionName=1.0.$BUILD_NUMBER
-          # إعادة تسمية الملف ليظهر باسم تطبيقك عند التحميل
-          mv app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/debug/UofK_Chem.apk
+          
+          # التأكد من وجود الملف قبل إعادة تسميته لتجنب الخطأ
+          IF_FILE="app/build/outputs/apk/debug/app-debug.apk"
+          if [ -f "$IF_FILE" ]; then
+            mv "$IF_FILE" app/build/outputs/apk/debug/UofK_Chem.apk
+          fi
     artifacts:
       - android/app/build/outputs/apk/debug/UofK_Chem.apk
     publishing:
