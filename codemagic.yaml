@@ -30,7 +30,6 @@ workflows:
         publishing:
           email:
             recipients:
-                abuker10252@gmail.com
               - your-email@example.com # ضع ايميلك هنا لتستلم الرابط
             notify:
               success: true
