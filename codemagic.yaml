@@ -1,40 +1,38 @@
 # Updated for Direct APK Download
 workflows:
-    react-native-android:
-        name: React Native Android Build
-        max_build_duration: 120
-        instance_type: mac_mini_m2
-        environment:
-          android_signing:
-            - keystore_reference # This refers to your uploaded keystore in Codemagic UI
-          vars:
-            PACKAGE_NAME: "your.package.name" # Change this to your app package name
-          node: v20
-        scripts:
-            - name: Install dependencies
-              script: |
-                   nvm use 20
-                    yarn install 
-            - name: Set Android SDK location
-              script: |
-                echo "sdk.dir=$ANDROID_SDK_ROOT" > "$CM_BUILD_DIR/android/local.properties"            
-            - name: Build Android APK
-                 script: |
-                           cd android
-                         echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
-                          chmod +x gradlew
-                         ./gradlew assembleRelease
-     
-                  -PversionCode=$BUILD_NUMBER \
-                  -PversionName=1.0.$BUILD_NUMBER
-        artifacts:
-            # Path for the generated APK file
-            - android/app/build/outputs/apk/release/*.apk
-        publishing:
-          email:
-            recipients:
-              - your-email@example.com # ضع ايميلك هنا لتستلم الرابط
-            notify:
-              success: true
-              failure: true
-              
+  react-native-android:
+    name: React Native Android Build
+    max_build_duration: 120
+    instance_type: mac_mini_m2
+    environment:
+      android_signing:
+        - keystore_reference
+      vars:
+        PACKAGE_NAME: "your.package.name" # غير اسم الحزمة هنا
+      node: v20
+    scripts:
+      - name: Install dependencies
+        script: |
+          nvm use 20
+          yarn install
+      - name: Set Android SDK location
+        script: |
+          echo "sdk.dir=$ANDROID_SDK_ROOT" > android/local.properties
+      - name: Build Android APK
+        script: |
+          cd android
+          echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
+          chmod +x gradlew
+          ./gradlew assembleRelease \
+            -PversionCode=$BUILD_NUMBER \
+            -PversionName=1.0.$BUILD_NUMBER
+    artifacts:
+      - android/app/build/outputs/apk/release/*.apk
+    publishing:
+      email:
+        recipients:
+          - your-email@example.com # ضع ايميلك هنا
+        notify:
+          success: true
+          failure: true
+          
