@@ -1,4 +1,4 @@
-# Updated for Direct APK Download - UofK Chem App
+# Final Configuration for UofK Chem App
 workflows:
   react-native-android:
     name: React Native Android Build
@@ -6,9 +6,9 @@ workflows:
     instance_type: mac_mini_m2
     environment:
       android_signing:
-        - keystore_reference # تأكد من رفع ملف الـ keystore في إعدادات Codemagic
+        - keystore_reference
       vars:
-        PACKAGE_NAME: "your.package.name" # استبدله باسم الحزمة الخاص بتطبيقك
+        PACKAGE_NAME: "your.package.name" # استبدله باسم الحزمة الخاص بك
       node: v20
     scripts:
       - name: Install dependencies
@@ -17,26 +17,20 @@ workflows:
           yarn install
       - name: Expo Prebuild
         script: |
-          # هذه الخطوة مهمة جداً لأن مجلد android غير موجود في المستودع
+          # توليد مجلد android المفقود تلقائياً
           npx expo prebuild --platform android --non-interactive
-      - name: Set Android SDK location
+      - name: Configure Android Project
         script: |
-          # إنشاء ملف الإعدادات داخل مجلد أندرويد المنشأ حديثاً
+          # إعداد مسار الـ SDK
           echo "sdk.dir=$ANDROID_SDK_ROOT" > android/local.properties
+          
+          # حل مشكلة Worklets: تفعيل المعمارية الجديدة
+          echo "newArchEnabled=true" >> android/gradle.properties
       - name: Build Android APK
         script: |
           cd android
           chmod +x gradlew
+          ./gradlew clean
+          # تم تغييرها لـ assembleDebug لضمان نجاح البناء وتخطي مشاكل التوقيع حالياً
           ./gradlew assembleDebug \
-            -PversionCode=$BUILD_NUMBER \
-            -PversionName=1.0.$BUILD_NUMBER
-    artifacts:
-      - android/app/build/outputs/apk/release/*.apk
-    publishing:
-      email:
-        recipients:
-          - your-email@example.com # ضع بريدك الإلكتروني هنا لتصلك النسخة
-        notify:
-          success: true
-          failure: true
-          
+            -P
