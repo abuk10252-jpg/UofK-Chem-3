@@ -13,18 +13,18 @@ workflows:
         scripts:
             - name: Install dependencies
               script: |
-                nvm use 20
-                yarn install 
+                   nvm use 20
+                    yarn install 
             - name: Set Android SDK location
               script: |
                 echo "sdk.dir=$ANDROID_SDK_ROOT" > "$CM_BUILD_DIR/android/local.properties"            
             - name: Build Android APK
                  script: |
-                cd android
-                echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
-                      chmod +x gradlew
-                   ./gradlew assembleRelease
-    
+                           cd android
+                         echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
+                          chmod +x gradlew
+                         ./gradlew assembleRelease
+     
                   -PversionCode=$BUILD_NUMBER \
                   -PversionName=1.0.$BUILD_NUMBER
         artifacts:
