@@ -5,16 +5,13 @@ import { apiCall } from '../utils/api';
 export interface User {
   id: string;
   email: string;
-  university_id: string;
   name: string;
-  role: string;
   status: string;
 }
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<User>;
   logout: () => Promise<void>;
 }
 
@@ -30,42 +27,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   async function checkAuth() {
     try {
+      // 1. شيك أولاً لو في مستخدم محفوظ "محلياً" في الموبايل
+      const cachedUser = await AsyncStorage.getItem('user_data');
+      if (cachedUser) {
+        setUser(JSON.parse(cachedUser));
+      }
+
+      // 2. حاول تحديث البيانات من السيرفر بس بمهلة قصيرة (3 ثواني)
       const token = await AsyncStorage.getItem('token');
       if (token) {
-        // سباق بين السيرفر وبين 3 ثواني أمان
         const data = await Promise.race([
           apiCall('/api/auth/me'),
           new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 3000))
         ]) as any;
-        
+
         if (data && data.user) {
           setUser(data.user);
+          // حدث المخزن المحلي بالبيانات الجديدة
+          await AsyncStorage.setItem('user_data', JSON.stringify(data.user));
         }
       }
     } catch (err) {
-      console.log("Auth Check bypassed due to server timeout or no token.");
+      console.log("Offline mode: Using cached user data or login required.");
     } finally {
-      setLoading(false); // فك التعليقة إجبارياً
+      setLoading(false); 
     }
   }
 
-  async function login(email: string, password: string) {
-    const data = await apiCall('/api/auth/login', {
-      method: 'POST',
-      body: JSON.stringify({ email, password }),
-    });
-    await AsyncStorage.setItem('token', data.token);
-    setUser(data.user);
-    return data.user;
-  }
-
   async function logout() {
-    await AsyncStorage.removeItem('token');
+    await AsyncStorage.multiRemove(['token', 'user_data']);
     setUser(null);
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, logout }}>
       {children}
     </AuthContext.Provider>
   );
