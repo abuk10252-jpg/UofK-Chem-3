@@ -1,23 +1,36 @@
 import { useEffect } from 'react';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useFonts } from 'expo-font';
+import { AuthProvider, useAuth } from '../src/context/AuthContext';
 
-SplashScreen.preventAutoHideAsync();
+// بنمنع الشاشة من الإخفاء التلقائي عشان نتحكم فيها إحنا
+SplashScreen.preventAutoHideAsync().catch(() => {});
 
-export default function RootLayout() {
-  const [loaded] = useFonts({});
+function RootLayoutNav() {
+  const { loading } = useAuth();
 
   useEffect(() => {
-    if (loaded) {
-      // بنعطي ثانية واحدة أمان قبل الإخفاء
-      setTimeout(async () => {
-        await SplashScreen.hideAsync();
+    // لو الـ Auth خلص تحميل، أو مر زمن معين، بنخفي الشاشة
+    if (!loading) {
+      const timer = setTimeout(async () => {
+        await SplashScreen.hideAsync().catch(() => {});
       }, 1000);
+      return () => clearTimeout(timer);
     }
-  }, [loaded]);
+  }, [loading]);
 
-  if (!loaded) return null;
+  return (
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="index" />
+      <Stack.Screen name="login" />
+    </Stack>
+  );
+}
 
-  return <Stack screenOptions={{ headerShown: false }} />;
+export default function RootLayout() {
+  return (
+    <AuthProvider>
+      <RootLayoutNav />
+    </AuthProvider>
+  );
 }
