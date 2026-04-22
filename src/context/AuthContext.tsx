@@ -34,16 +34,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     checkAuth();
   }, []);
 
+  // دالة فحص التوثيق المعدلة لفك تعليقة السيرفر
   async function checkAuth() {
     try {
       const token = await AsyncStorage.getItem('token');
       if (token) {
-        const data = await apiCall('/api/auth/me');
-        setUser(data.user);
+        // حنحاول نتصل بالسيرفر بس بنعطيه 3 ثواني أمان فقط
+        const data = await Promise.race([
+          apiCall('/api/auth/me'),
+          new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Server Timeout')), 3500)
+          )
+        ]) as any;
+
+        if (data && data.user) {
+          setUser(data.user);
+        }
       }
-    } catch {
-      await AsyncStorage.removeItem('token');
+    } catch (err) {
+      console.log("Auth Status: Server not responding or no token. Proceeding...");
     } finally {
+      // السطر ده هو "الزيت"؛ بيقفل اللودينق ويفتح التطبيق مهما حصل
       setLoading(false);
     }
   }
