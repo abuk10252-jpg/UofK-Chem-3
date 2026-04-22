@@ -3,8 +3,7 @@
     "name": "UofK Chem",
     "slug": "uofk-chem",
     "version": "1.0.0",
-    "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "newArchEnabled": true,
     "splash": {
       "image": "./assets/images/splash-icon.png",
       "resizeMode": "contain",
@@ -12,10 +11,9 @@
     },
     "android": {
       "package": "com.abuk10252.uofkchem",
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#002147"
-      }
+      "versionCode": 20, 
+      "allowBackup": false,
+      "softwareKeyboardLayoutMode": "pan"
     }
   }
 }
