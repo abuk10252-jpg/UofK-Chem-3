@@ -4,7 +4,6 @@ import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { useAuth } from '../src/context/AuthContext';
 import * as SplashScreen from 'expo-splash-screen';
 
-// نمنع الإخفاء التلقائي عشان نتحكم إحنا
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
 export default function Index() {
@@ -13,7 +12,7 @@ export default function Index() {
   const router = useRouter();
 
   useEffect(() => {
-    // عداد أمان إضافي (4 ثواني) لضمان دخول التطبيق
+    // كاسر التعليقة (4 ثواني) لضمان عدم الوقوف في الشاشة الزرقاء
     const timer = setTimeout(() => {
       setSafetyTimeout(true);
     }, 4000);
@@ -22,15 +21,18 @@ export default function Index() {
 
   useEffect(() => {
     if (!loading || safetyTimeout) {
-      // إخفاء السبلاش سكرين فوراً
       SplashScreen.hideAsync().catch(() => {});
 
-      if (!user) {
+      if (!user && (loading === false || safetyTimeout)) {
+        // لو مافي مستخدم (لا في الموبايل ولا السيرفر) روح للتسجيل
         router.replace('/login');
-      } else if (user.status === 'pending') {
-        router.replace('/pending');
-      } else {
-        router.replace('/(tabs)/academic');
+      } else if (user) {
+        // لو في مستخدم محفوظ، ادخل فوراً (حتى لو أوفلاين)
+        if (user.status === 'pending') {
+          router.replace('/pending');
+        } else {
+          router.replace('/(tabs)/academic');
+        }
       }
     }
   }, [user, loading, safetyTimeout]);
@@ -43,10 +45,5 @@ export default function Index() {
 }
 
 const styles = StyleSheet.create({
-  container: { 
-    flex: 1, 
-    justifyContent: 'center', 
-    alignItems: 'center', 
-    backgroundColor: '#002147' 
-  },
+  container: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#002147' },
 });
