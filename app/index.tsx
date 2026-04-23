@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'expo-router';
-import { View, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, ActivityIndicator, StyleSheet, Text } from 'react-native';
 import { useAuth } from '../src/context/AuthContext';
 import * as SplashScreen from 'expo-splash-screen';
 
@@ -12,7 +12,6 @@ export default function Index() {
   const router = useRouter();
 
   useEffect(() => {
-    // كاسر التعليقة (4 ثواني) لضمان عدم الوقوف في الشاشة الزرقاء
     const timer = setTimeout(() => {
       setSafetyTimeout(true);
     }, 4000);
@@ -24,10 +23,8 @@ export default function Index() {
       SplashScreen.hideAsync().catch(() => {});
 
       if (!user && (loading === false || safetyTimeout)) {
-        // لو مافي مستخدم (لا في الموبايل ولا السيرفر) روح للتسجيل
         router.replace('/login');
       } else if (user) {
-        // لو في مستخدم محفوظ، ادخل فوراً (حتى لو أوفلاين)
         if (user.status === 'pending') {
           router.replace('/pending');
         } else {
@@ -40,6 +37,9 @@ export default function Index() {
   return (
     <View style={styles.container}>
       <ActivityIndicator size="large" color="#D4AF37" />
+      <Text style={{ color: '#fff', marginTop: 20, fontSize: 16, textAlign: 'center' }}>
+        جاري التأكد من تسجيلك أو الاتصال بالإنترنت...
+      </Text>
     </View>
   );
 }
