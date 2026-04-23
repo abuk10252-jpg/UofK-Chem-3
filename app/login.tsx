@@ -36,7 +36,7 @@ export default function LoginScreen() {
         email: "abuk10252@gmail.com"
       });
 
-      router.replace('/admin'); // ← غيّرها لو مسار الأدمن مختلف
+      router.replace('/admin');
       return;
     }
 
@@ -139,4 +139,18 @@ const styles = StyleSheet.create({
   subtitle: { fontSize: 14, color: 'rgba(255,255,255,0.7)', marginTop: 4 },
   subtitleAr: { fontSize: 14, color: 'rgba(255,255,255,0.5)', marginTop: 2 },
   card: { backgroundColor: '#FFF', borderRadius: 24, padding: 24, shadowColor: '#000', shadowOffset: {width:0,height:8}, shadowOpacity: 0.1, shadowRadius: 24, elevation: 8 },
-  cardTitle: { fontSize: 20, fontWeight: '700'}
+  cardTitle: { fontSize: 20, fontWeight: '700' },
+
+  errBox: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FEE2E2', padding: 12, borderRadius: 12, marginBottom: 16 },
+  errText: { color: Colors.error, marginLeft: 8, fontSize: 14, flex: 1 },
+
+  inputWrap: { flexDirection: 'row', alignItems: 'center', backgroundColor: Colors.background, borderWidth: 1, borderColor: Colors.border, borderRadius: 12, paddingHorizontal: 16, marginBottom: 16, height: 56, gap: 12 },
+  input: { flex: 1, fontSize: 16, color: Colors.textPrimary },
+
+  btn: { backgroundColor: Colors.primary, borderRadius: 12, paddingVertical: 16, alignItems: 'center', marginTop: 8 },
+  btnText: { color: '#FFF', fontSize: 16, fontWeight: '700' },
+
+  link: { alignItems: 'center', marginTop: 20 },
+  linkText: { fontSize: 14, color: Colors.textSecondary },
+  linkBold: { color: Colors.accent, fontWeight: '700' },
+});
