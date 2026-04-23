@@ -20,16 +20,19 @@ export default function Index() {
     if (!loading || safetyTimeout) {
       SplashScreen.hideAsync().catch(() => {});
 
-      if (!user) {
-        router.replace('/login');
-        return;
-      }
+      // 🔥 الحل السحري لمنع الـ Crash
+      setTimeout(() => {
+        if (!user) {
+          router.replace('/login');
+          return;
+        }
 
-      if (user.status === 'pending') {
-        router.replace('/pending');
-      } else {
-        router.replace('/(tabs)/academic');
-      }
+        if (user.status === 'pending') {
+          router.replace('/pending');
+        } else {
+          router.replace('/(tabs)/academic');
+        }
+      }, 50); // ← delay بسيط يمنع الـ double navigation crash
     }
   }, [user, loading, safetyTimeout]);
 
