@@ -1,6 +1,6 @@
 workflows:
   react-native-android:
-    name: React Native Android Build
+    name: React Native Android Release Build
     max_build_duration: 120
     instance_type: mac_mini_m2
 
@@ -17,7 +17,7 @@ workflows:
           nvm use 20
           yarn install
 
-      - name: Expo Prebuild (generate fresh android)
+      - name: Expo Prebuild (generate android folder)
         script: |
           npx expo prebuild --platform android --non-interactive
 
@@ -26,15 +26,15 @@ workflows:
           echo "sdk.dir=$ANDROID_SDK_ROOT" > android/local.properties
           echo "newArchEnabled=true" >> android/gradle.properties
 
-      - name: Build Android APK
+      - name: Build Android RELEASE APK
         script: |
           cd android
           chmod +x gradlew
           ./gradlew clean
-          ./gradlew assembleDebug -PversionCode=$BUILD_NUMBER -PversionName=1.0.$BUILD_NUMBER
+          ./gradlew assembleRelease -PversionCode=$BUILD_NUMBER -PversionName=1.0.$BUILD_NUMBER
 
     artifacts:
-      - android/app/build/outputs/apk/debug/*.apk
+      - android/app/build/outputs/apk/release/*.apk
 
     publishing:
       email:
