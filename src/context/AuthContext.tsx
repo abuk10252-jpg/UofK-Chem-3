@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Alert } from 'react-native';
 import { apiCall } from '../utils/api';
 
 export interface User {
@@ -27,13 +28,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   async function checkAuth() {
     try {
-      // 1. شيك أولاً لو في مستخدم محفوظ "محلياً" في الموبايل
-      const cachedUser = await AsyncStorage.getItem('user_data');
-      if (cachedUser) {
-        setUser(JSON.parse(cachedUser));
+      // أولاً: حاول تجيب مستخدم من الكاش مع حماية من الكاش التالف
+      const cachedUserStr = await AsyncStorage.getItem('user_data');
+      if (cachedUserStr) {
+        try {
+          setUser(JSON.parse(cachedUserStr));
+        } catch (e) {
+          await AsyncStorage.removeItem('user_data');
+          setUser(null);
+        }
       }
 
-      // 2. حاول تحديث البيانات من السيرفر بس بمهلة قصيرة (3 ثواني)
+      // إذا عندك توكن، حاول تحدث المستخدم من السيرفر ومعك Timeout 3 ثواني
       const token = await AsyncStorage.getItem('token');
       if (token) {
         const data = await Promise.race([
@@ -43,14 +49,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         if (data && data.user) {
           setUser(data.user);
-          // حدث المخزن المحلي بالبيانات الجديدة
           await AsyncStorage.setItem('user_data', JSON.stringify(data.user));
         }
       }
     } catch (err) {
       console.log("Offline mode: Using cached user data or login required.");
+      Alert.alert(
+        "تنبيه",
+        "لا يمكن الاتصال بالسيرفر.\nسيتم استخدام البيانات القديمة أو يجب تسجيل الدخول مجدداً.",
+        [{ text: "حسناً" }]
+      );
     } finally {
-      setLoading(false); 
+      setLoading(false);
     }
   }
 
