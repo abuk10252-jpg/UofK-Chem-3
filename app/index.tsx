@@ -12,9 +12,7 @@ export default function Index() {
   const router = useRouter();
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setSafetyTimeout(true);
-    }, 4000);
+    const timer = setTimeout(() => setSafetyTimeout(true), 4000);
     return () => clearTimeout(timer);
   }, []);
 
@@ -22,14 +20,15 @@ export default function Index() {
     if (!loading || safetyTimeout) {
       SplashScreen.hideAsync().catch(() => {});
 
-      if (!user && (loading === false || safetyTimeout)) {
+      if (!user) {
         router.replace('/login');
-      } else if (user) {
-        if (user.status === 'pending') {
-          router.replace('/pending');
-        } else {
-          router.replace('/(tabs)/academic');
-        }
+        return;
+      }
+
+      if (user.status === 'pending') {
+        router.replace('/pending');
+      } else {
+        router.replace('/(tabs)/academic');
       }
     }
   }, [user, loading, safetyTimeout]);
@@ -37,7 +36,7 @@ export default function Index() {
   return (
     <View style={styles.container}>
       <ActivityIndicator size="large" color="#D4AF37" />
-      <Text style={{ color: '#fff', marginTop: 20, fontSize: 16, textAlign: 'center' }}>
+      <Text style={styles.text}>
         جاري التأكد من تسجيلك أو الاتصال بالإنترنت...
       </Text>
     </View>
@@ -46,4 +45,5 @@ export default function Index() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#002147' },
+  text: { color: '#fff', marginTop: 20, fontSize: 16, textAlign: 'center' }
 });
