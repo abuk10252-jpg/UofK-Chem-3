@@ -17,6 +17,17 @@
       "backgroundColor": "#002147"
     },
 
+    "plugins": [
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/splash.png",
+          "resizeMode": "cover",
+          "backgroundColor": "#002147"
+        }
+      ]
+    ],
+
     "android": {
       "package": "com.abuk10252.uofkchem",
       "versionCode": 26,
