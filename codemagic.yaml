@@ -17,16 +17,16 @@ workflows:
           sed -i '' 's/newArchEnabled=false/newArchEnabled=true/g' android/gradle.properties
           echo "newArchEnabled=true" >> android/gradle.properties
 
-      - name: Build Android APK
+      - name: Build Android APK (Release)
         script: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug -PversionCode=$BUILD_NUMBER -PversionName=1.0.$BUILD_NUMBER
+          ./gradlew assembleRelease -PversionCode=$BUILD_NUMBER -PversionName=1.0.$BUILD_NUMBER
 
       - name: Export APK
         script: |
-          cp android/app/build/outputs/apk/debug/app-debug.apk \
-             android/app/build/outputs/apk/debug/UofK_Chem.apk
+          cp android/app/build/outputs/apk/release/app-release.apk \
+             android/app/build/outputs/apk/release/UofK_Chem.apk
 
     artifacts:
-      - android/app/build/outputs/apk/debug/UofK_Chem.apk
+      - android/app/build/outputs/apk/release/UofK_Chem.apk
