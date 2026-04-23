@@ -139,4 +139,4 @@ const styles = StyleSheet.create({
   subtitle: { fontSize: 14, color: 'rgba(255,255,255,0.7)', marginTop: 4 },
   subtitleAr: { fontSize: 14, color: 'rgba(255,255,255,0.5)', marginTop: 2 },
   card: { backgroundColor: '#FFF', borderRadius: 24, padding: 24, shadowColor: '#000', shadowOffset: {width:0,height:8}, shadowOpacity: 0.1, shadowRadius: 24, elevation: 8 },
-  cardTitle: { fontSize: 20, fontWeight: '700
+  cardTitle: { fontSize: 20, fontWeight: '700'}
