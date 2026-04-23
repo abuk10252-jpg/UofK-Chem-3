@@ -43,7 +43,7 @@ export default function LoginScreen() {
           </View>
           <Text style={styles.appName}>UofK Chem</Text>
           <Text style={styles.subtitle}>Chemical Engineering Platform</Text>
-          <Text style={styles.subtitleAr}>منصة الهندسة الكيميائية</Text>
+          <Text style={styles.subtitleAr}>تطبيق الهندسة الكيميائية</Text>
         </View>
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Sign In / تسجيل الدخول</Text>
