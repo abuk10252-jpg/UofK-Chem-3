@@ -20,11 +20,15 @@ workflows:
         script: |
           npx expo prebuild --platform android --non-interactive
 
-      - name: Remove old splashscreen logo (Fix error)
+      - name: Remove old splashscreen logo files
         script: |
           rm -f android/app/src/main/res/drawable/splashscreen_logo.png
           rm -f android/app/src/main/res/drawable-*/splashscreen_logo.png
           rm -f android/app/src/main/res/mipmap-*/splashscreen_logo.png
+
+      - name: Remove splashscreen_logo reference from values.xml
+        script: |
+          sed -i '' '/splashscreen_logo/d' android/app/src/main/res/values/values.xml || true
 
       - name: Configure Android Project
         script: |
