@@ -1,38 +1,50 @@
 workflows:
-  build-android:
-    name: Build Android APK
-    max_build_duration: 60
-
+  react-native-android:
+    name: React Native Android Build
+    max_build_duration: 120
+    instance_type: mac_mini_m2
     environment:
-      node: latest
-      java: 17
+      android_signing:
+        - keystore_reference
       vars:
-        EXPO_TOKEN: $EXPO_TOKEN
+        PACKAGE_NAME: "com.abuk10252.uofkchem"
+      node: v20
 
     scripts:
       - name: Install dependencies
         script: |
-          npm install
+          nvm use 20
+          yarn install
 
       - name: Expo Prebuild
         script: |
-          npx expo prebuild
+          npx expo prebuild --platform android --non-interactive
 
-      - name: Remove old splashscreen logo
+      - name: Remove old splashscreen logo (Fix error)
         script: |
           rm -f android/app/src/main/res/drawable/splashscreen_logo.png
           rm -f android/app/src/main/res/drawable-*/splashscreen_logo.png
           rm -f android/app/src/main/res/mipmap-*/splashscreen_logo.png
 
-      - name: Build Android Release APK
+      - name: Configure Android Project
+        script: |
+          echo "sdk.dir=$ANDROID_SDK_ROOT" > android/local.properties
+          echo "newArchEnabled=true" >> android/gradle.properties
+
+      - name: Build Android APK
         script: |
           cd android
-          ./gradlew assembleRelease
+          chmod +x gradlew
+          ./gradlew clean
+          ./gradlew assembleDebug -PversionCode=$BUILD_NUMBER -PversionName=1.0.$BUILD_NUMBER
 
     artifacts:
-      - android/app/build/outputs/**/*.apk
+      - android/app/build/outputs/apk/debug/*.apk
 
     publishing:
       email:
         recipients:
-          - "abuk10252@gmail.com"
+          - abuk10252@gmail.com
+        notify:
+          success: true
+          failure: true
