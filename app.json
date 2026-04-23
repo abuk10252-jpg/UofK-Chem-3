@@ -4,14 +4,20 @@
     "slug": "uofk-chem",
     "version": "1.0.0",
     "newArchEnabled": true,
+
+    "extra": {
+      "API_URL": "https://your-backend-url.com"
+    },
+
     "splash": {
       "image": "./assets/images/splash-icon.png",
       "resizeMode": "cover",
       "backgroundColor": "#002147"
     },
+
     "android": {
       "package": "com.abuk10252.uofkchem",
-      "versionCode": 20, 
+      "versionCode": 26,
       "allowBackup": false,
       "softwareKeyboardLayoutMode": "pan"
     }
