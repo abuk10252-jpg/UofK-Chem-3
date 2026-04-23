@@ -3,16 +3,18 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { apiCall } from '../utils/api';
 
 export interface User {
-  id: string;
+  id?: string;
   email: string;
   name: string;
   status: string;
+  role?: string;
 }
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
   logout: () => Promise<void>;
+  setUser: (u: User | null) => void;
 }
 
 export const AuthContext = createContext<AuthContextType>({} as AuthContextType);
@@ -66,7 +68,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, logout }}>
+    <AuthContext.Provider value={{ user, loading, logout, setUser }}>
       {children}
     </AuthContext.Provider>
   );
