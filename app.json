@@ -11,6 +11,12 @@
 
     "icon": "./assets/images/icon.png",
 
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "cover",
+      "backgroundColor": "#002147"
+    },
+
     "android": {
       "package": "com.abuk10252.uofkchem",
       "versionCode": 26,
@@ -18,4 +24,3 @@
       "softwareKeyboardLayoutMode": "pan"
     }
   }
-}
