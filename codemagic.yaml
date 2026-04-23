@@ -3,6 +3,7 @@ workflows:
     name: React Native Android Build
     max_build_duration: 120
     instance_type: mac_mini_m2
+
     environment:
       android_signing:
         - keystore_reference
@@ -16,19 +17,13 @@ workflows:
           nvm use 20
           yarn install
 
-      - name: Expo Prebuild
+      - name: Delete old android folder completely
+        script: |
+          rm -rf android
+
+      - name: Expo Prebuild (generate fresh android)
         script: |
           npx expo prebuild --platform android --non-interactive
-
-      - name: Remove old splashscreen logo files
-        script: |
-          rm -f android/app/src/main/res/drawable/splashscreen_logo.png
-          rm -f android/app/src/main/res/drawable-*/splashscreen_logo.png
-          rm -f android/app/src/main/res/mipmap-*/splashscreen_logo.png
-
-      - name: Remove splashscreen_logo reference from values.xml
-        script: |
-          sed -i '' '/splashscreen_logo/d' android/app/src/main/res/values/values.xml || true
 
       - name: Configure Android Project
         script: |
