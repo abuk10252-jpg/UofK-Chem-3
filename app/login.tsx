@@ -14,12 +14,20 @@ export default function LoginScreen() {
   const [error, setError] = useState('');
   const [showPw, setShowPw] = useState(false);
 
+  // استبدل الـ useEffect القديم بهذا:
   useEffect(() => {
     if (user) {
-      if (user.status === 'pending') router.replace('/pending');
-      else if (user.status === 'approved') router.replace('/(tabs)/academic');
+      const timer = setTimeout(() => {
+        if (user.status === 'pending') {
+          router.replace('/pending');
+        } else if (user.status === 'approved') {
+          router.replace('/(tabs)/academic');
+        }
+      }, 80); // delay بسيط لتجنب التعارض
+
+      return () => clearTimeout(timer);
     }
-  }, [user]);
+  }, [user, router]);
 
   async function handleLogin() {
     if (!email || !password) { 
