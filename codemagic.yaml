@@ -34,7 +34,7 @@ workflows:
           ./gradlew assembleRelease -PversionCode=$BUILD_NUMBER -PversionName=1.0.$BUILD_NUMBER
 
     artifacts:
-      - android/app/build/outputs/apk/release/*.apk
+      - android/app/build/outputs/apk/UofK-Chem/*.apk
 
     publishing:
       email:
