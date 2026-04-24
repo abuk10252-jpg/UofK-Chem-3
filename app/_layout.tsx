@@ -1,17 +1,9 @@
 import { Slot } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
 
-SplashScreen.preventAutoHideAsync();
+// يجب أن يكون خارج أي كومبوننت
+SplashScreen.preventAutoHideAsync().catch(() => {});
 
 export default function RootLayout() {
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      SplashScreen.hideAsync();
-    }, 1200);
-
-    return () => clearTimeout(timer);
-  }, []);
-
   return <Slot />;
 }
