@@ -8,33 +8,38 @@ SplashScreen.preventAutoHideAsync().catch(() => {});
 
 export default function Index() {
   const { user, loading } = useAuth();
-  const [safetyTimeout, setSafetyTimeout] = useState(false);
   const router = useRouter();
+  const [safetyTimeout, setSafetyTimeout] = useState(false);
 
+  // Safety timeout في حالة تأخر الـ Auth
   useEffect(() => {
     const timer = setTimeout(() => setSafetyTimeout(true), 4000);
     return () => clearTimeout(timer);
   }, []);
 
+  // التحكم في إخفاء Splash + الـ Navigation
   useEffect(() => {
-    if (!loading || safetyTimeout) {
-      SplashScreen.hideAsync().catch(() => {});
+    if (loading && !safetyTimeout) return;
 
-      // 🔥 الحل السحري لمنع الـ Crash
-      setTimeout(() => {
-        if (!user) {
-          router.replace('/login');
-          return;
-        }
+    // إخفاء الـ Splash Screen
+    SplashScreen.hideAsync().catch(() => {});
 
-        if (user.status === 'pending') {
-          router.replace('/pending');
-        } else {
-          router.replace('/(tabs)/academic');
-        }
-      }, 50); // ← delay بسيط يمنع الـ double navigation crash
-    }
-  }, [user, loading, safetyTimeout]);
+    // تأخير بسيط لتجنب Double Navigation Crash
+    const navigationTimer = setTimeout(() => {
+      if (!user) {
+        router.replace('/login');
+        return;
+      }
+
+      if (user.status === 'pending') {
+        router.replace('/pending');
+      } else {
+        router.replace('/(tabs)/academic');
+      }
+    }, 80);
+
+    return () => clearTimeout(navigationTimer);
+  }, [user, loading, safetyTimeout, router]);
 
   return (
     <View style={styles.container}>
@@ -47,6 +52,17 @@ export default function Index() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#002147' },
-  text: { color: '#fff', marginTop: 20, fontSize: 16, textAlign: 'center' }
+  container: { 
+    flex: 1, 
+    justifyContent: 'center', 
+    alignItems: 'center', 
+    backgroundColor: '#002147' 
+  },
+  text: { 
+    color: '#fff', 
+    marginTop: 20, 
+    fontSize: 16, 
+    textAlign: 'center',
+    paddingHorizontal: 20 
+  }
 });
