@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useAuth } from '../src/context/AuthContext';
-import { Colors } from '../src/constants/colors';
+import { useAuth } from '@/context/AuthContext';   // ← التعديل الرئيسي هنا
+import { Colors } from '@/constants/colors';       // ← غيرته كمان للتوافق
 
 export default function LoginScreen() {
   const { login, user, setUser } = useAuth();
@@ -14,7 +14,6 @@ export default function LoginScreen() {
   const [error, setError] = useState('');
   const [showPw, setShowPw] = useState(false);
 
-  // استبدل الـ useEffect القديم بهذا:
   useEffect(() => {
     if (user) {
       const timer = setTimeout(() => {
@@ -23,7 +22,7 @@ export default function LoginScreen() {
         } else if (user.status === 'approved') {
           router.replace('/(tabs)/academic');
         }
-      }, 80); // delay بسيط لتجنب التعارض
+      }, 80);
 
       return () => clearTimeout(timer);
     }
@@ -35,7 +34,7 @@ export default function LoginScreen() {
       return; 
     }
 
-    // 🔥🔥 حساب الأدمن اليدوي
+    // 🔥 حساب الأدمن اليدوي
     if (email === "abuk10252@gmail.com" && password === "Aaabus06555$") {
       setUser({
         status: "approved",
@@ -43,12 +42,10 @@ export default function LoginScreen() {
         name: "Super Admin",
         email: "abuk10252@gmail.com"
       });
-
       router.replace('/admin');
       return;
     }
 
-    // 🔥🔥 تسجيل الدخول العادي
     setLoading(true); 
     setError('');
 
@@ -148,16 +145,12 @@ const styles = StyleSheet.create({
   subtitleAr: { fontSize: 14, color: 'rgba(255,255,255,0.5)', marginTop: 2 },
   card: { backgroundColor: '#FFF', borderRadius: 24, padding: 24, shadowColor: '#000', shadowOffset: {width:0,height:8}, shadowOpacity: 0.1, shadowRadius: 24, elevation: 8 },
   cardTitle: { fontSize: 20, fontWeight: '700' },
-
   errBox: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FEE2E2', padding: 12, borderRadius: 12, marginBottom: 16 },
   errText: { color: Colors.error, marginLeft: 8, fontSize: 14, flex: 1 },
-
   inputWrap: { flexDirection: 'row', alignItems: 'center', backgroundColor: Colors.background, borderWidth: 1, borderColor: Colors.border, borderRadius: 12, paddingHorizontal: 16, marginBottom: 16, height: 56, gap: 12 },
   input: { flex: 1, fontSize: 16, color: Colors.textPrimary },
-
   btn: { backgroundColor: Colors.primary, borderRadius: 12, paddingVertical: 16, alignItems: 'center', marginTop: 8 },
   btnText: { color: '#FFF', fontSize: 16, fontWeight: '700' },
-
   link: { alignItems: 'center', marginTop: 20 },
   linkText: { fontSize: 14, color: Colors.textSecondary },
   linkBold: { color: Colors.accent, fontWeight: '700' },
