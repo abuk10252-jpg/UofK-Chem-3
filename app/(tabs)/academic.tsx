@@ -2,8 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList, ActivityIndicator, RefreshControl, Modal, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useAuth } from '../../src/context/AuthContext';
-import { Colors } from '../../src/constants/colors';
+import { useAuth } from '../src/context/AuthContext';
+import { Colors } from '../src/constants/colors';
 import { apiCall } from '../../src/utils/api';
 import { t } from '../../src/utils/i18n';
 
