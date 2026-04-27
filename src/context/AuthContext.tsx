@@ -16,6 +16,7 @@ interface AuthContextType {
   logout: () => Promise<void>;
   setUser: (u: User | null) => void;
   login: (email: string, password: string) => Promise<User>;
+  register: (data: any) => Promise<User>;
 }
 
 export const AuthContext = createContext<AuthContextType>({} as AuthContextType);
@@ -28,6 +29,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     checkAuth();
   }, []);
 
+  // -----------------------------
+  // CHECK AUTH (عشان السبلاش ما تقيف)
+  // -----------------------------
   async function checkAuth() {
     try {
       const cachedUserStr = await AsyncStorage.getItem('user_data');
@@ -63,36 +67,5 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  async function login(email: string, password: string): Promise<User> {
-    // هنا بنفترض إن الـ apiCall بيرجع { user, token } من /api/auth/login
-    const data = await apiCall('/api/auth/login', 'POST', { email, password });
-
-    if (!data || !data.user) {
-      throw new Error('Login failed');
-    }
-
-    const loggedInUser: User = data.user;
-
-    setUser(loggedInUser);
-    await AsyncStorage.setItem('user_data', JSON.stringify(loggedInUser));
-
-    if (data.token) {
-      await AsyncStorage.setItem('token', data.token);
-    }
-
-    return loggedInUser;
-  }
-
-  async function logout() {
-    await AsyncStorage.multiRemove(['token', 'user_data']);
-    setUser(null);
-  }
-
-  return (
-    <AuthContext.Provider value={{ user, loading, logout, setUser, login, register }}>
-      {children}
-    </AuthContext.Provider>
-  );
-}
-
-export const useAuth = () => useContext(AuthContext);
+  // -----------------------------
+  //
