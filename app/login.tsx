@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useAuth } from '../src/context/AuthContext';   // ← relative path آمن
-import { Colors } from '../src/constants/colors';       // ← relative path آمن
+import { useAuth } from '../src/context/AuthContext';
+import { Colors } from '../src/constants/colors';
 
 export default function LoginScreen() {
   const { login, user, setUser } = useAuth();
@@ -35,12 +35,12 @@ export default function LoginScreen() {
     }
 
     // حساب الأدمن اليدوي
-    if (email === "abuk10252@gmail.com" && password === "Aaabus06555$") {
+    if (email === 'abuk10252@gmail.com' && password === 'Aaabus06555$') {
       setUser({
-        status: "approved",
-        role: "admin",
-        name: "Super Admin",
-        email: "abuk10252@gmail.com"
+        status: 'approved',
+        role: 'admin',
+        name: 'Super Admin',
+        email: 'abuk10252@gmail.com'
       });
       router.replace('/admin');
       return;
