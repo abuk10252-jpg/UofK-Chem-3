@@ -11,14 +11,11 @@ workflows:
         PACKAGE_NAME: "com.abuk10252.uofkchem"
         EXPO_PUBLIC_API_URL: "https://uofk-chem-server.onrender.com/api"
         CI: "1"
-      node: v20
     
     scripts:
       - name: Install dependencies
         script: |
-          nvm use 20
-          npm install
-          npx expo-doctor@latest fix --fix-dependencies
+          npm install --legacy-peer-deps
       
       - name: Create .env file
         script: |
