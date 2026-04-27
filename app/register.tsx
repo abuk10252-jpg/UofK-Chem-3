@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useAuth } from '@/context/AuthContext';   // ← التعديل الرئيسي هنا
-import { Colors } from '@/constants/colors';       // ← غيرته كمان للتوافق
+import { useAuth } from '../../src/context/AuthContext';   // ← relative path آمن
+import { Colors } from '../../src/constants/colors';       // ← relative path آمن
 
 export default function RegisterScreen() {
   const { register, user } = useAuth();
