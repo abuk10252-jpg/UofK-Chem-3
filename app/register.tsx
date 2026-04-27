@@ -9,8 +9,8 @@ import {
   Alert,
   ScrollView,
 } from 'react-native';
-import { useAuth } from '../context/AuthContext';
-import { registerUser } from '../utils/api';
+import { useAuth } from '../../src/context/AuthContext';
+import { registerUser } from '../../src/utils/api';
 
 export default function RegisterScreen({ navigation }: any) {
   const { setUser, setToken } = useAuth();
