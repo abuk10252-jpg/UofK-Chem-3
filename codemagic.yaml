@@ -9,13 +9,14 @@ environment:
     PACKAGE_NAME: "com.abuk10252.uofkchem"
     API_URL: "https://uofk-chem-server.onrender.com/api"
     EXPO_PUBLIC_API_URL: "https://uofk-chem-server.onrender.com/api"
+    CI: "1"
   node: v20
 
 scripts:
   - name: Install dependencies
     script: |
       nvm use 20
-      yarn install
+      yarn install --network-timeout 600000
 
   - name: Create .env file
     script: |
@@ -26,7 +27,7 @@ scripts:
 
   - name: Expo Prebuild (generate android folder)
     script: |
-      npx expo prebuild --platform android --clean --non-interactive
+      npx expo prebuild --platform android --clean
 
   - name: Configure Android Project
     script: |
@@ -50,4 +51,3 @@ publishing:
     notify:
       success: true
       failure: true
-      
