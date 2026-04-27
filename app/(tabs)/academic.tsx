@@ -4,7 +4,7 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../src/context/AuthContext';
 import { Colors } from '../src/constants/colors';
-import { apiCall } from '../../src/utils/api';
+import { apiCall } from '../src/utils/api';
 import { t } from '../../src/utils/i18n';
 
 interface Course { id: string; name: string; name_ar: string; description: string; description_ar: string; file_count: number; }
