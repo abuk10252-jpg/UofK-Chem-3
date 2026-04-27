@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useAuth } from '../src/context/AuthContext';
-import { Colors } from '../src/constants/colors';
+import { useAuth } from '@/context/AuthContext';   // ← التعديل الرئيسي هنا
+import { Colors } from '@/constants/colors';       // ← غيرته كمان للتوافق
 
 export default function RegisterScreen() {
   const { register, user } = useAuth();
@@ -23,16 +23,27 @@ export default function RegisterScreen() {
   }, [user]);
 
   async function handleRegister() {
-    if (!name || !email || !universityId || !password) { setError('Please fill in all fields'); return; }
-    if (password.length < 6) { setError('Password must be at least 6 characters'); return; }
-    setLoading(true); setError('');
+    if (!name || !email || !universityId || !password) { 
+      setError('Please fill in all fields'); 
+      return; 
+    }
+    if (password.length < 6) { 
+      setError('Password must be at least 6 characters'); 
+      return; 
+    }
+
+    setLoading(true); 
+    setError('');
+
     try {
       const u = await register({ email, university_id: universityId, name, password });
       if (u.status === 'pending') router.replace('/pending');
       else router.replace('/(tabs)/academic');
     } catch (e: any) {
       setError(e.message || 'Registration failed');
-    } finally { setLoading(false); }
+    } finally { 
+      setLoading(false); 
+    }
   }
 
   return (
@@ -45,28 +56,74 @@ export default function RegisterScreen() {
         </View>
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Register / تسجيل</Text>
-          {error ? (<View style={styles.errBox}><Ionicons name="alert-circle" size={16} color={Colors.error} /><Text style={styles.errText}>{error}</Text></View>) : null}
+          {error ? (
+            <View style={styles.errBox}>
+              <Ionicons name="alert-circle" size={16} color={Colors.error} />
+              <Text style={styles.errText}>{error}</Text>
+            </View>
+          ) : null}
+          
           <View style={styles.inputWrap}>
             <Ionicons name="person-outline" size={20} color={Colors.textSecondary} />
-            <TextInput testID="register-name-input" style={styles.input} placeholder="Full Name / الاسم الكامل" value={name} onChangeText={setName} placeholderTextColor={Colors.textSecondary} />
+            <TextInput 
+              testID="register-name-input" 
+              style={styles.input} 
+              placeholder="Full Name / الاسم الكامل" 
+              value={name} 
+              onChangeText={setName} 
+              placeholderTextColor={Colors.textSecondary} 
+            />
           </View>
           <View style={styles.inputWrap}>
             <Ionicons name="mail-outline" size={20} color={Colors.textSecondary} />
-            <TextInput testID="register-email-input" style={styles.input} placeholder="University Email / البريد الجامعي" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" placeholderTextColor={Colors.textSecondary} />
+            <TextInput 
+              testID="register-email-input" 
+              style={styles.input} 
+              placeholder="University Email / البريد الجامعي" 
+              value={email} 
+              onChangeText={setEmail} 
+              keyboardType="email-address" 
+              autoCapitalize="none" 
+              placeholderTextColor={Colors.textSecondary} 
+            />
           </View>
           <View style={styles.inputWrap}>
             <Ionicons name="card-outline" size={20} color={Colors.textSecondary} />
-            <TextInput testID="register-uid-input" style={styles.input} placeholder="University ID / الرقم الجامعي" value={universityId} onChangeText={setUniversityId} placeholderTextColor={Colors.textSecondary} />
+            <TextInput 
+              testID="register-uid-input" 
+              style={styles.input} 
+              placeholder="University ID / الرقم الجامعي" 
+              value={universityId} 
+              onChangeText={setUniversityId} 
+              placeholderTextColor={Colors.textSecondary} 
+            />
           </View>
           <View style={styles.inputWrap}>
             <Ionicons name="lock-closed-outline" size={20} color={Colors.textSecondary} />
-            <TextInput testID="register-password-input" style={styles.input} placeholder="Password / كلمة المرور" value={password} onChangeText={setPassword} secureTextEntry placeholderTextColor={Colors.textSecondary} />
+            <TextInput 
+              testID="register-password-input" 
+              style={styles.input} 
+              placeholder="Password / كلمة المرور" 
+              value={password} 
+              onChangeText={setPassword} 
+              secureTextEntry 
+              placeholderTextColor={Colors.textSecondary} 
+            />
           </View>
-          <TouchableOpacity testID="register-submit-button" style={[styles.btn, loading && {opacity:0.7}]} onPress={handleRegister} disabled={loading}>
+
+          <TouchableOpacity 
+            testID="register-submit-button" 
+            style={[styles.btn, loading && {opacity:0.7}]} 
+            onPress={handleRegister} 
+            disabled={loading}
+          >
             {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.btnText}>Create Account / إنشاء حساب</Text>}
           </TouchableOpacity>
+
           <TouchableOpacity testID="go-to-login" style={styles.link} onPress={() => router.push('/login')}>
-            <Text style={styles.linkText}>Already have an account? <Text style={styles.linkBold}>Sign In / دخول</Text></Text>
+            <Text style={styles.linkText}>
+              Already have an account? <Text style={styles.linkBold}>Sign In / دخول</Text>
+            </Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
