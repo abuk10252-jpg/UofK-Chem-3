@@ -1,152 +1,261 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator } from 'react-native';
-import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import { useAuth } from '../src/context/AuthContext';
-import { Colors } from '../src/constants/colors';
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  ActivityIndicator,
+  Alert,
+  ScrollView,
+} from 'react-native';
+import { useAuth } from '../context/AuthContext';
+import { registerUser } from '../utils/api';
 
-export default function RegisterScreen() {
-  const { register, user } = useAuth();
-  const router = useRouter();
+export default function RegisterScreen({ navigation }: any) {
+  const { setUser, setToken } = useAuth();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [universityId, setUniversityId] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  useEffect(() => {
-    if (user) {
-      if (user.status === 'pending') router.replace('/pending');
-      else if (user.status === 'approved') router.replace('/(tabs)/academic');
+  const validateForm = () => {
+    if (!name.trim()) {
+      Alert.alert('تنبيه', 'يرجى إدخال الاسم');
+      return false;
     }
-  }, [user, router]);
+    if (!email.trim()) {
+      Alert.alert('تنبيه', 'يرجى إدخال البريد الإلكتروني');
+      return false;
+    }
+    if (!password.trim()) {
+      Alert.alert('تنبيه', 'يرجى إدخال كلمة المرور');
+      return false;
+    }
+    if (password.length < 8) {
+      Alert.alert('تنبيه', 'كلمة المرور يجب أن تكون 8 أحرف على الأقل');
+      return false;
+    }
+    if (password !== confirmPassword) {
+      Alert.alert('تنبيه', 'كلمات المرور غير متطابقة');
+      return false;
+    }
+    if (!email.includes('@')) {
+      Alert.alert('تنبيه', 'البريد الإلكتروني غير صحيح');
+      return false;
+    }
+    return true;
+  };
 
-  async function handleRegister() {
-    if (!name || !email || !universityId || !password) {
-      setError('Please fill in all fields');
-      return;
-    }
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters');
-      return;
-    }
+  const handleRegister = async () => {
+    if (!validateForm()) return;
 
     setLoading(true);
-    setError('');
 
     try {
-      const u = await register({ email, university_id: universityId, name, password });
-      if (u.status === 'pending') router.replace('/pending');
-      else router.replace('/(tabs)/academic');
-    } catch (e: any) {
-      setError(e.message || 'Registration failed');
+      const response = await registerUser(name, email, password);
+
+      if (response.ok && response.data?.user) {
+        setUser(response.data.user);
+        setToken(response.data.token);
+        
+        // ✅ إضافة تأخير قبل الانتقال
+        Alert.alert('نجاح', 'تم إنشاء الحساب بنجاح', [
+          {
+            text: 'حسناً',
+            onPress: () => {
+              setTimeout(() => {
+                navigation.navigate('Home');
+              }, 500);
+            },
+          },
+        ]);
+      } else {
+        Alert.alert('خطأ', response.error || 'فشل التسجيل');
+      }
+    } catch (error: any) {
+      console.error('Register error:', error);
+      Alert.alert('خطأ', error.message || 'حدث خطأ أثناء التسجيل');
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   return (
-    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-      <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
-        <View style={styles.header}>
-          <View style={styles.logo}><Ionicons name="flask" size={40} color={Colors.accent} /></View>
-          <Text style={styles.appName}>UofK Chem</Text>
-          <Text style={styles.subtitle}>Create your account / إنشاء حساب</Text>
-        </View>
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Register / تسجيل</Text>
-          {error ? (
-            <View style={styles.errBox}>
-              <Ionicons name="alert-circle" size={16} color={Colors.error} />
-              <Text style={styles.errText}>{error}</Text>
-            </View>
-          ) : null}
+    <ScrollView style={styles.container}>
+      <View style={styles.content}>
+        <Text style={styles.title}>إنشاء حساب جديد</Text>
 
-          <View style={styles.inputWrap}>
-            <Ionicons name="person-outline" size={20} color={Colors.textSecondary} />
-            <TextInput 
-              testID="register-name-input" 
-              style={styles.input} 
-              placeholder="Full Name / الاسم الكامل" 
-              value={name} 
-              onChangeText={setName} 
-              placeholderTextColor={Colors.textSecondary} 
-            />
-          </View>
-          <View style={styles.inputWrap}>
-            <Ionicons name="mail-outline" size={20} color={Colors.textSecondary} />
-            <TextInput 
-              testID="register-email-input" 
-              style={styles.input} 
-              placeholder="University Email / البريد الجامعي" 
-              value={email} 
-              onChangeText={setEmail} 
-              keyboardType="email-address" 
-              autoCapitalize="none" 
-              placeholderTextColor={Colors.textSecondary} 
-            />
-          </View>
-          <View style={styles.inputWrap}>
-            <Ionicons name="card-outline" size={20} color={Colors.textSecondary} />
-            <TextInput 
-              testID="register-uid-input" 
-              style={styles.input} 
-              placeholder="University ID / الرقم الجامعي" 
-              value={universityId} 
-              onChangeText={setUniversityId} 
-              placeholderTextColor={Colors.textSecondary} 
-            />
-          </View>
-          <View style={styles.inputWrap}>
-            <Ionicons name="lock-closed-outline" size={20} color={Colors.textSecondary} />
-            <TextInput 
-              testID="register-password-input" 
-              style={styles.input} 
-              placeholder="Password / كلمة المرور" 
-              value={password} 
-              onChangeText={setPassword} 
-              secureTextEntry 
-              placeholderTextColor={Colors.textSecondary} 
-            />
-          </View>
+        {/* حقل الاسم */}
+        <Text style={styles.label}>الاسم الكامل</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="أدخل اسمك الكامل"
+          value={name}
+          onChangeText={setName}
+          editable={!loading}
+          placeholderTextColor="#999"
+        />
 
-          <TouchableOpacity 
-            testID="register-submit-button" 
-            style={[styles.btn, loading && {opacity:0.7}]} 
-            onPress={handleRegister} 
-            disabled={loading}
-          >
-            {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.btnText}>Create Account / إنشاء حساب</Text>}
-          </TouchableOpacity>
+        {/* حقل البريد الإلكتروني */}
+        <Text style={styles.label}>البريد الإلكتروني</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="أدخل بريدك الإلكتروني"
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+          editable={!loading}
+          placeholderTextColor="#999"
+        />
 
-          <TouchableOpacity testID="go-to-login" style={styles.link} onPress={() => router.push('/login')}>
-            <Text style={styles.linkText}>
-              Already have an account? <Text style={styles.linkBold}>Sign In / دخول</Text>
+        {/* حقل كلمة المرور */}
+        <Text style={styles.label}>كلمة المرور</Text>
+        <View style={styles.passwordContainer}>
+          <TextInput
+            style={styles.passwordInput}
+            placeholder="أدخل كلمة مرورك (8 أحرف على الأقل)"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry={!showPassword}
+            editable={!loading}
+            placeholderTextColor="#999"
+          />
+          <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+            <Text style={styles.togglePassword}>
+              {showPassword ? '🙈' : '👁️'}
             </Text>
           </TouchableOpacity>
         </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+
+        {/* حقل تأكيد كلمة المرور */}
+        <Text style={styles.label}>تأكيد كلمة المرور</Text>
+        <View style={styles.passwordContainer}>
+          <TextInput
+            style={styles.passwordInput}
+            placeholder="أعد إدخال كلمة مرورك"
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+            secureTextEntry={!showConfirmPassword}
+            editable={!loading}
+            placeholderTextColor="#999"
+          />
+          <TouchableOpacity
+            onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+          >
+            <Text style={styles.togglePassword}>
+              {showConfirmPassword ? '🙈' : '👁️'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* زر التسجيل */}
+        <TouchableOpacity
+          style={[styles.button, loading && styles.buttonDisabled]}
+          onPress={handleRegister}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.buttonText}>إنشاء حساب</Text>
+          )}
+        </TouchableOpacity>
+
+        {/* رابط الدخول */}
+        <View style={styles.footer}>
+          <Text style={styles.footerText}>لديك حساب بالفعل؟ </Text>
+          <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+            <Text style={styles.linkText}>تسجيل دخول</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.primary },
-  scroll: { flexGrow: 1, justifyContent: 'center', padding: 24 },
-  header: { alignItems: 'center', marginBottom: 24 },
-  logo: { width: 64, height: 64, borderRadius: 16, backgroundColor: 'rgba(212,175,55,0.15)', alignItems: 'center', justifyContent: 'center', marginBottom: 12 },
-  appName: { fontSize: 28, fontWeight: '800', color: '#FFF' },
-  subtitle: { fontSize: 14, color: 'rgba(255,255,255,0.6)', marginTop: 4 },
-  card: { backgroundColor: '#FFF', borderRadius: 24, padding: 24, shadowColor: '#000', shadowOffset: {width:0,height:8}, shadowOpacity: 0.1, shadowRadius: 24, elevation: 8 },
-  cardTitle: { fontSize: 20, fontWeight: '700', color: Colors.textPrimary, marginBottom: 20 },
-  errBox: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FEE2E2', padding: 12, borderRadius: 12, marginBottom: 16 },
-  errText: { color: Colors.error, marginLeft: 8, fontSize: 14, flex: 1 },
-  inputWrap: { flexDirection: 'row', alignItems: 'center', backgroundColor: Colors.background, borderWidth: 1, borderColor: Colors.border, borderRadius: 12, paddingHorizontal: 16, marginBottom: 14, height: 56, gap: 12 },
-  input: { flex: 1, fontSize: 16, color: Colors.textPrimary },
-  btn: { backgroundColor: Colors.primary, borderRadius: 12, paddingVertical: 16, alignItems: 'center', marginTop: 8 },
-  btnText: { color: '#FFF', fontSize: 16, fontWeight: '700' },
-  link: { alignItems: 'center', marginTop: 20 },
-  linkText: { fontSize: 14, color: Colors.textSecondary },
-  linkBold: { color: Colors.accent, fontWeight: '700' },
+  container: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+  },
+  content: {
+    padding: 20,
+    paddingTop: 40,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    marginBottom: 30,
+    textAlign: 'center',
+    color: '#333',
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 8,
+    color: '#333',
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 16,
+    backgroundColor: '#fff',
+    fontSize: 14,
+    color: '#333',
+  },
+  passwordContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    backgroundColor: '#fff',
+    marginBottom: 16,
+  },
+  passwordInput: {
+    flex: 1,
+    padding: 12,
+    fontSize: 14,
+    color: '#333',
+  },
+  togglePassword: {
+    paddingRight: 12,
+    fontSize: 18,
+  },
+  button: {
+    backgroundColor: '#34C759',
+    padding: 14,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginBottom: 12,
+    marginTop: 10,
+  },
+  buttonDisabled: {
+    opacity: 0.6,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 20,
+  },
+  footerText: {
+    color: '#666',
+    fontSize: 14,
+  },
+  linkText: {
+    color: '#007AFF',
+    fontSize: 14,
+    fontWeight: '600',
+  },
 });
