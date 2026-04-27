@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useAuth } from '../src/context/AuthContext';   // ← relative path آمن
-import { Colors } from '../src/constants/colors';       // ← relative path آمن
+import { useAuth } from '../src/context/AuthContext';
+import { Colors } from '../src/constants/colors';
 
 export default function RegisterScreen() {
   const { register, user } = useAuth();
@@ -20,19 +20,19 @@ export default function RegisterScreen() {
       if (user.status === 'pending') router.replace('/pending');
       else if (user.status === 'approved') router.replace('/(tabs)/academic');
     }
-  }, [user]);
+  }, [user, router]);
 
   async function handleRegister() {
-    if (!name || !email || !universityId || !password) { 
-      setError('Please fill in all fields'); 
-      return; 
+    if (!name || !email || !universityId || !password) {
+      setError('Please fill in all fields');
+      return;
     }
-    if (password.length < 6) { 
-      setError('Password must be at least 6 characters'); 
-      return; 
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters');
+      return;
     }
 
-    setLoading(true); 
+    setLoading(true);
     setError('');
 
     try {
@@ -41,8 +41,8 @@ export default function RegisterScreen() {
       else router.replace('/(tabs)/academic');
     } catch (e: any) {
       setError(e.message || 'Registration failed');
-    } finally { 
-      setLoading(false); 
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -62,7 +62,7 @@ export default function RegisterScreen() {
               <Text style={styles.errText}>{error}</Text>
             </View>
           ) : null}
-          
+
           <View style={styles.inputWrap}>
             <Ionicons name="person-outline" size={20} color={Colors.textSecondary} />
             <TextInput 
