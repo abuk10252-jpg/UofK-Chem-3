@@ -8,6 +8,8 @@ export interface User {
   name: string;
   status: string;
   role?: string;
+  language?: string;
+  subscribed_courses?: string[];
 }
 
 interface AuthContextType {
@@ -17,6 +19,7 @@ interface AuthContextType {
   setUser: (u: User | null) => void;
   login: (email: string, password: string) => Promise<User>;
   register: (data: any) => Promise<User>;
+  refreshUser: () => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextType>({} as AuthContextType);
@@ -61,9 +64,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
     } catch {
-      console.log("Offline mode: using cached user only.");
+      console.log('Offline mode: using cached user only.');
     } finally {
       setLoading(false);
+    }
+  }
+
+  // -----------------------------
+  // REFRESH USER (للبروفايل وغيره)
+  // -----------------------------
+  async function refreshUser() {
+    try {
+      const data = await apiCall('/api/auth/me');
+      if (data && data.user) {
+        setUser(data.user);
+        await AsyncStorage.setItem('user_data', JSON.stringify(data.user));
+      }
+    } catch (e) {
+      console.log('Failed to refresh user', e);
     }
   }
 
@@ -126,7 +144,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, logout, setUser, login, register }}>
+    <AuthContext.Provider
+      value={{ user, loading, logout, setUser, login, register, refreshUser }}
+    >
       {children}
     </AuthContext.Provider>
   );
