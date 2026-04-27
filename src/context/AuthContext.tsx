@@ -30,7 +30,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   // -----------------------------
-  // CHECK AUTH (عشان السبلاش ما تقيف)
+  // CHECK AUTH
   // -----------------------------
   async function checkAuth() {
     try {
@@ -68,4 +68,68 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   // -----------------------------
-  //
+  // LOGIN
+  // -----------------------------
+  async function login(email: string, password: string): Promise<User> {
+    const data = await apiCall('/api/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password })
+    });
+
+    if (!data || !data.user) {
+      throw new Error(data?.message || 'Login failed');
+    }
+
+    const loggedInUser: User = data.user;
+
+    setUser(loggedInUser);
+    await AsyncStorage.setItem('user_data', JSON.stringify(loggedInUser));
+
+    if (data.token) {
+      await AsyncStorage.setItem('token', data.token);
+    }
+
+    return loggedInUser;
+  }
+
+  // -----------------------------
+  // REGISTER
+  // -----------------------------
+  async function register(data: any): Promise<User> {
+    const res = await apiCall('/api/auth/register', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+
+    if (!res || !res.user) {
+      throw new Error(res?.message || 'Registration failed');
+    }
+
+    const newUser: User = res.user;
+
+    setUser(newUser);
+    await AsyncStorage.setItem('user_data', JSON.stringify(newUser));
+
+    if (res.token) {
+      await AsyncStorage.setItem('token', res.token);
+    }
+
+    return newUser;
+  }
+
+  // -----------------------------
+  // LOGOUT
+  // -----------------------------
+  async function logout() {
+    await AsyncStorage.multiRemove(['token', 'user_data']);
+    setUser(null);
+  }
+
+  return (
+    <AuthContext.Provider value={{ user, loading, logout, setUser, login, register }}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+export const useAuth = () => useContext(AuthContext);
