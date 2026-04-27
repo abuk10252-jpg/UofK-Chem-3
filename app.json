@@ -1,38 +1,64 @@
 {
   "expo": {
-    "name": "UofK Chem",
+    "name": "UOFK Chemistry",
     "slug": "uofk-chem",
     "version": "1.0.0",
-    "newArchEnabled": true,
-
-    "extra": {
-      "API_URL": "https://uofk-chem-server.onrender.com"
-    },
-
+    "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-
+    "scheme": "uofkchem",
+    "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/images/splash.png",
-      "resizeMode": "cover",
-      "backgroundColor": "#002147"
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
     },
-
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTabletMode": true,
+      "bundleIdentifier": "com.uofkchem.app",
+      "buildNumber": "1"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.uofkchem.app",
+      "versionCode": 1,
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.INTERNET"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/images/favicon.png",
+      "bundler": "metro"
+    },
     "plugins": [
       [
-        "expo-splash-screen",
+        "expo-image-picker",
         {
-          "image": "./assets/images/splash.png",
-          "resizeMode": "cover",
-          "backgroundColor": "#002147"
+          "photosPermission": "السماح ل$(PRODUCT_NAME) بالوصول للصور",
+          "cameraPermission": "السماح ل$(PRODUCT_NAME) باستخدام الكاميرا"
+        }
+      ],
+      [
+        "expo-document-picker",
+        {
+          "iCloudContainerEnvironment": "Production"
         }
       ]
     ],
-
-    "android": {
-      "package": "com.abuk10252.uofkchem",
-      "versionCode": 26,
-      "allowBackup": false,
-      "softwareKeyboardLayoutMode": "pan"
+    "extra": {
+      "eas": {
+        "projectId": "your-project-id-here"
+      }
+    },
+    "owner": "your-username",
+    "runtimeVersion": {
+      "policy": "appVersion"
     }
   }
 }
