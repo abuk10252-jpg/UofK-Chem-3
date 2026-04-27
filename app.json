@@ -6,7 +6,7 @@
     "newArchEnabled": true,
 
     "extra": {
-      "API_URL": "https://your-backend-url.com"
+      "API_URL": "https://uofk-chem-server.onrender.com"
     },
 
     "icon": "./assets/images/icon.png",
