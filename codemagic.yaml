@@ -1,53 +1,56 @@
-React Native Android Release Build
-max_build_duration: 120
-instance_type: mac_mini_m2
-
-environment:
-  android_signing:
-    - keystore_reference
-  vars:
-    PACKAGE_NAME: "com.abuk10252.uofkchem"
-    API_URL: "https://uofk-chem-server.onrender.com/api"
-    EXPO_PUBLIC_API_URL: "https://uofk-chem-server.onrender.com/api"
-    CI: "1"
-  node: v20
-
-scripts:
-  - name: Install dependencies
-    script: |
-      nvm use 20
-      yarn install --network-timeout 600000
-
-  - name: Create .env file
-    script: |
-      cat > .env << EOF
-      EXPO_PUBLIC_API_URL=https://uofk-chem-server.onrender.com/api
-      EOF
-      cat .env
-
-  - name: Expo Prebuild (generate android folder)
-    script: |
-      npx expo prebuild --platform android --clean
-
-  - name: Configure Android Project
-    script: |
-      echo "sdk.dir=$ANDROID_SDK_ROOT" > android/local.properties
-      cd android
-      chmod +x gradlew
-
-  - name: Build Android RELEASE APK
-    script: |
-      cd android
-      ./gradlew clean
-      ./gradlew assembleRelease -PversionCode=$BUILD_NUMBER -PversionName=1.0.$BUILD_NUMBER
-
-artifacts:
-  - android/app/build/outputs/apk/release/*.apk
-
-publishing:
-  email:
-    recipients:
-      - abuk10252@gmail.com
-    notify:
-      success: true
-      failure: true
+workflows:
+  react-native-android-release:
+    name: React Native Android Release Build
+    max_build_duration: 120
+    instance_type: mac_mini_m2
+    
+    environment:
+      android_signing:
+        - keystore_reference
+      vars:
+        PACKAGE_NAME: "com.abuk10252.uofkchem"
+        API_URL: "https://uofk-chem-server.onrender.com/api"
+        EXPO_PUBLIC_API_URL: "https://uofk-chem-server.onrender.com/api"
+        CI: "1"
+      node: v20
+    
+    scripts:
+      - name: Install dependencies
+        script: |
+          nvm use 20
+          yarn install --network-timeout 600000
+      
+      - name: Create .env file
+        script: |
+          cat > .env << EOF
+          EXPO_PUBLIC_API_URL=https://uofk-chem-server.onrender.com/api
+          EOF
+          cat .env
+      
+      - name: Expo Prebuild
+        script: |
+          npx expo prebuild --platform android --clean
+      
+      - name: Configure Android Project
+        script: |
+          echo "sdk.dir=$ANDROID_SDK_ROOT" > android/local.properties
+          cd android
+          chmod +x gradlew
+      
+      - name: Build Android RELEASE APK
+        script: |
+          cd android
+          ./gradlew clean
+          ./gradlew assembleRelease -PversionCode=$BUILD_NUMBER -PversionName=1.0.$BUILD_NUMBER
+    
+    artifacts:
+      - android/app/build/outputs/apk/release/*.apk
+    
+    publishing:
+      email:
+        recipients:
+          - abuk10252@gmail.com
+        notify:
+          success: true
+          failure: true
+          
