@@ -1,34 +1,59 @@
-import Constants from 'expo-constants';
+import axios, { AxiosError } from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_URL } from '../config';
 
-const BASE_URL = Constants.expoConfig?.extra?.API_URL;
+const api = axios.create({
+  baseURL: API_URL,
+  timeout: 10000,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
 
-if (!BASE_URL) {
-  console.error('⚠️ API_URL not configured in app.json');
-}
-
-export async function apiCall(endpoint: string, options: any = {}) {
+// إضافة التوكن إلى الطلبات
+api.interceptors.request.use(async (config) => {
   try {
-    const token = await AsyncStorage.getItem('userToken');
-    
-    const res = await fetch(`${BASE_URL}${endpoint}`, {
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token && { Authorization: `Bearer ${token}` }),
-        ...(options.headers || {})
-      },
-      ...options
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      throw new Error(data.message || `API Error: ${res.status}`);
+    const token = await AsyncStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
-
-    return data;
   } catch (error) {
-    console.error('API Call Error:', error);
+    console.error('Error reading token:', error);
+  }
+  return config;
+});
+
+// معالجة الأخطاء والاستجابات
+api.interceptors.response.use(
+  (response) => {
+    console.log('API Response:', response.data);
+    return response.data;
+  },
+  (error: AxiosError) => {
+    const message = 
+      (error.response?.data as any)?.message || 
+      error.message || 
+      'An error occurred';
+    console.error('API Error:', message);
+    throw new Error(message);
+  }
+);
+
+export async function apiCall(
+  endpoint: string,
+  options?: {
+    method?: string;
+    body?: string;
+  }
+) {
+  try {
+    if (options?.method === 'POST') {
+      return await api.post(endpoint, JSON.parse(options.body || '{}'));
+    }
+    return await api.get(endpoint);
+  } catch (error: any) {
     throw error;
   }
 }
+
+export default api;
