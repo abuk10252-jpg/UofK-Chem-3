@@ -1,40 +1,46 @@
-import { useEffect } from 'react';
-import { Slot } from 'expo-router';
+import React, { useEffect } from 'react';
+import { Slot, useRouter } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { AuthProvider, useAuth } from '@/src/context/AuthContext';
+import { AuthProvider, useAuth } from '../src/context/AuthContext';
 import { ActivityIndicator, View } from 'react-native';
 
-// منع إخفاء Splash Screen تلقائياً
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
-// مكون للتحقق من الـ Token
 function RootLayoutContent() {
-  const { token, isLoading } = useAuth();
+  const { user, loading } = useAuth();
+  const router = useRouter();
 
   useEffect(() => {
-    const checkToken = async () => {
+    const handleNavigation = async () => {
       try {
-        const savedToken = await AsyncStorage.getItem('userToken');
-        
-        // إخفاء Splash Screen بعد التحقق
-        if (savedToken || !isLoading) {
-          await SplashScreen.hideAsync();
+        await SplashScreen.hideAsync();
+
+        // التأكد من حالة المستخدم والملاحة
+        if (loading) {
+          return;
+        }
+
+        if (!user) {
+          router.replace('/login');
+        } else if (user.role === 'admin') {
+          router.replace('/admin');
+        } else if (user.status === 'pending') {
+          router.replace('/pending');
+        } else if (user.status === 'approved') {
+          router.replace('/(tabs)/academic');
         }
       } catch (error) {
-        console.error('Error checking token:', error);
-        await SplashScreen.hideAsync();
+        console.error('Navigation error:', error);
       }
     };
 
-    checkToken();
-  }, [token, isLoading]);
+    handleNavigation();
+  }, [user, loading, router]);
 
-  // عرض Loading بينما نتحقق من الـ Token
-  if (isLoading) {
+  if (loading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color="#0000ff" />
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#1B3A4B' }}>
+        <ActivityIndicator size="large" color="#D4AF37" />
       </View>
     );
   }
