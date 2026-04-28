@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "newArchEnabled": true,
     "extra": {
-      "API_URL": "https://uofk-chem-server.onrender.com/api"
+      "API_URL": "https://server-2-xpsh.onrender.com/api"
     },
     "icon": "./assets/images/icon.png",
     "splash": {
