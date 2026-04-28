@@ -4,12 +4,14 @@ import { apiCall } from '../utils/api';
 
 export interface User {
   id?: string;
+  _id?: string;
   email: string;
   name: string;
   status: string;
   role?: string;
   language?: string;
   subscribed_courses?: string[];
+  university_id?: string;
 }
 
 interface AuthContextType {
@@ -32,9 +34,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     checkAuth();
   }, []);
 
-  // -----------------------------
-  // CHECK AUTH
-  // -----------------------------
+  // تحميل بيانات المستخدم المحفوظة
   async function checkAuth() {
     try {
       const cachedUserStr = await AsyncStorage.getItem('user_data');
@@ -53,26 +53,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       }
 
-      const data = await Promise.race([
-        apiCall('/api/auth/me'),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 3000))
-      ]);
+      // محاولة تحديث البيانات من السرفر
+      try {
+        const data = await Promise.race([
+          apiCall('/api/auth/me'),
+          new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('timeout')), 5000)
+          ),
+        ]);
 
-      if (data && data.user) {
-        setUser(data.user);
-        await AsyncStorage.setItem('user_data', JSON.stringify(data.user));
+        if (data && data.user) {
+          setUser(data.user);
+          await AsyncStorage.setItem('user_data', JSON.stringify(data.user));
+        }
+      } catch (error) {
+        console.log('Could not refresh user from server, using cached data');
       }
 
-    } catch {
-      console.log('Offline mode: using cached user only.');
+    } catch (error) {
+      console.error('Auth check error:', error);
     } finally {
       setLoading(false);
     }
   }
 
-  // -----------------------------
-  // REFRESH USER (للبروفايل وغيره)
-  // -----------------------------
+  // تحديث بيانات المستخدم
   async function refreshUser() {
     try {
       const data = await apiCall('/api/auth/me');
@@ -81,66 +86,78 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await AsyncStorage.setItem('user_data', JSON.stringify(data.user));
       }
     } catch (e) {
-      console.log('Failed to refresh user', e);
+      console.error('Failed to refresh user:', e);
     }
   }
 
-  // -----------------------------
-  // LOGIN
-  // -----------------------------
+  // تسجيل الدخول
   async function login(email: string, password: string): Promise<User> {
-    const data = await apiCall('/api/auth/login', {
-      method: 'POST',
-      body: JSON.stringify({ email, password })
-    });
+    try {
+      const data = await apiCall('/api/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({ email, password }),
+      });
 
-    if (!data || !data.user) {
-      throw new Error(data?.message || 'Login failed');
+      if (!data || !data.user) {
+        throw new Error(data?.message || 'Login failed - no user data received');
+      }
+
+      const loggedInUser: User = data.user;
+
+      // حفظ البيانات
+      setUser(loggedInUser);
+      await AsyncStorage.setItem('user_data', JSON.stringify(loggedInUser));
+
+      if (data.token) {
+        await AsyncStorage.setItem('token', data.token);
+      }
+
+      return loggedInUser;
+
+    } catch (error: any) {
+      console.error('Login error:', error);
+      throw error;
     }
-
-    const loggedInUser: User = data.user;
-
-    setUser(loggedInUser);
-    await AsyncStorage.setItem('user_data', JSON.stringify(loggedInUser));
-
-    if (data.token) {
-      await AsyncStorage.setItem('token', data.token);
-    }
-
-    return loggedInUser;
   }
 
-  // -----------------------------
-  // REGISTER
-  // -----------------------------
+  // التسجيل الجديد
   async function register(data: any): Promise<User> {
-    const res = await apiCall('/api/auth/register', {
-      method: 'POST',
-      body: JSON.stringify(data)
-    });
+    try {
+      const res = await apiCall('/api/auth/register', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
 
-    if (!res || !res.user) {
-      throw new Error(res?.message || 'Registration failed');
+      if (!res || !res.user) {
+        throw new Error(res?.message || 'Registration failed - no user data received');
+      }
+
+      const newUser: User = res.user;
+
+      // حفظ البيانات
+      setUser(newUser);
+      await AsyncStorage.setItem('user_data', JSON.stringify(newUser));
+
+      if (res.token) {
+        await AsyncStorage.setItem('token', res.token);
+      }
+
+      return newUser;
+
+    } catch (error: any) {
+      console.error('Register error:', error);
+      throw error;
     }
-
-    const newUser: User = res.user;
-
-    setUser(newUser);
-    await AsyncStorage.setItem('user_data', JSON.stringify(newUser));
-
-    if (res.token) {
-      await AsyncStorage.setItem('token', res.token);
-    }
-
-    return newUser;
   }
 
-  // -----------------------------
-  // LOGOUT
-  // -----------------------------
+  // تسجيل الخروج
   async function logout() {
-    await AsyncStorage.multiRemove(['token', 'user_data']);
-    setUser(null);
+    try {
+      await AsyncStorage.multiRemove(['token', 'user_data']);
+      setUser(null);
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
   }
 
   return (
@@ -152,4 +169,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within AuthProvider');
+  }
+  return context;
+};
