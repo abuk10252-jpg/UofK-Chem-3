@@ -1,9 +1,8 @@
 import { useEffect } from 'react';
 import { Slot } from 'expo-router';
-import { router } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { AuthProvider, useAuth } from '../../src/context/AuthContext';
+import { AuthProvider, useAuth } from '@/src/context/AuthContext';
 import { ActivityIndicator, View } from 'react-native';
 
 // منع إخفاء Splash Screen تلقائياً
@@ -18,14 +17,9 @@ function RootLayoutContent() {
       try {
         const savedToken = await AsyncStorage.getItem('userToken');
         
-        // التحقق من وجود Token أو انتهاء التحميل
-        if (!isLoading) {
+        // إخفاء Splash Screen بعد التحقق
+        if (savedToken || !isLoading) {
           await SplashScreen.hideAsync();
-          
-          // إذا لم يوجد token، انتقل لصفحة Login
-          if (!savedToken && !token) {
-            router.replace('/(auth)/login');
-          }
         }
       } catch (error) {
         console.error('Error checking token:', error);
@@ -39,7 +33,7 @@ function RootLayoutContent() {
   // عرض Loading بينما نتحقق من الـ Token
   if (isLoading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff' }}>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <ActivityIndicator size="large" color="#0000ff" />
       </View>
     );
