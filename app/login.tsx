@@ -9,8 +9,8 @@ import {
   Alert,
   ScrollView,
 } from 'react-native';
-import { useAuth } from '../../src/context/AuthContext';
-import { loginUser } from '../../src/utils/api';
+import { useAuth } from '../src/context/AuthContext';
+import { loginUser } from '../src/utils/api';
 
 export default function LoginScreen({ navigation }: any) {
   const { setUser, setToken } = useAuth();
