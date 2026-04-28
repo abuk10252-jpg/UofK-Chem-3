@@ -1,2 +1,2 @@
 
-export const API_URL = "https://uofk-chem-server.onrender.com";
+export const API_URL = "https://uofk-chem-server.onrender.com/api";
