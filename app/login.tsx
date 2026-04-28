@@ -1,240 +1,145 @@
-import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  ActivityIndicator,
-  Alert,
-  ScrollView,
-} from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator } from 'react-native';
+import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../src/context/AuthContext';
-import { loginUser } from '../src/utils/api';
+import { Colors } from '../src/constants/colors';
 
-export default function LoginScreen({ navigation }: any) {
-  const { setUser, setToken } = useAuth();
+export default function LoginScreen() {
+  const { login, user } = useAuth();
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
+  const [showPw, setShowPw] = useState(false);
 
-  // بيانات المسؤول للاختبار
-  const adminEmail = 'abuk10252@gmail.com';
-  const adminPassword = 'Aaabus06555$';
+  useEffect(() => {
+    if (user) {
+      const timer = setTimeout(() => {
+        if (user.role === 'admin') {
+          router.replace('/admin');
+        } else if (user.status === 'pending') {
+          router.replace('/pending');
+        } else if (user.status === 'approved') {
+          router.replace('/(tabs)/academic');
+        }
+      }, 100);
 
-  const handleLogin = async () => {
-    if (!email.trim() || !password.trim()) {
-      Alert.alert('تنبيه', 'يرجى ملء جميع الحقول');
-      return;
+      return () => clearTimeout(timer);
+    }
+  }, [user, router]);
+
+  async function handleLogin() {
+    if (!email || !password) { 
+      setError('Please fill in all fields'); 
+      return; 
     }
 
-    setLoading(true);
+    setLoading(true); 
+    setError('');
 
     try {
-      // التحقق إذا كان دخول المسؤول
-      if (email === adminEmail && password === adminPassword) {
-        const adminUser = {
-          uid: 'admin-user',
-          email: adminEmail,
-          name: 'المسؤول',
-          role: 'admin',
-        };
-
-        const mockToken = 'admin-token-12345';
-
-        // ✅ حفظ البيانات في State
-        setUser(adminUser);
-        setToken(mockToken);
-
-        // ✅ حفظ البيانات في AsyncStorage (سيتم عبر AuthContext)
-        Alert.alert('نجاح', 'تم الدخول كمسؤول');
-        return;
-      }
-
-      // دخول عادي عبر API
-      const response = await loginUser(email, password);
-
-      if (response.ok && response.data?.user) {
-        setUser(response.data.user);
-        setToken(response.data.token);
-        Alert.alert('نجاح', 'تم الدخول بنجاح');
-      } else {
-        Alert.alert('خطأ', response.error || 'فشل الدخول');
-      }
-    } catch (error: any) {
-      console.error('Login error:', error);
-      Alert.alert('خطأ', error.message || 'حدث خطأ أثناء الدخول');
-    } finally {
-      setLoading(false);
+      await login(email, password);
+      // الملاحة تتم من خلال useEffect أعلاه
+    } catch (e: any) {
+      setError(e.message || 'Login failed');
+    } finally { 
+      setLoading(false); 
     }
-  };
-
-  const handleAdminLogin = () => {
-    setEmail(adminEmail);
-    setPassword(adminPassword);
-  };
+  }
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.content}>
-        <Text style={styles.title}>تسجيل الدخول</Text>
+    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+      <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
+        <View style={styles.header}>
+          <View style={styles.logo}>
+            <Ionicons name="flask" size={48} color={Colors.accent} />
+          </View>
+          <Text style={styles.appName}>UofK Chem</Text>
+          <Text style={styles.subtitle}>Chemical Engineering Platform</Text>
+          <Text style={styles.subtitleAr}>منصة الهندسة الكيميائية</Text>
+        </View>
 
-        {/* حقل البريد الإلكتروني */}
-        <Text style={styles.label}>البريد الإلكتروني</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="أدخل بريدك الإلكتروني"
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-          editable={!loading}
-          placeholderTextColor="#999"
-        />
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Sign In / تسجيل الدخول</Text>
 
-        {/* حقل كلمة المرور */}
-        <Text style={styles.label}>كلمة المرور</Text>
-        <View style={styles.passwordContainer}>
-          <TextInput
-            style={styles.passwordInput}
-            placeholder="أدخل كلمة مرورك"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry={!showPassword}
-            editable={!loading}
-            placeholderTextColor="#999"
-          />
-          <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-            <Text style={styles.togglePassword}>
-              {showPassword ? '🙈' : '👁️'}
+          {error ? (
+            <View style={styles.errBox}>
+              <Ionicons name="alert-circle" size={16} color={Colors.error} />
+              <Text style={styles.errText}>{error}</Text>
+            </View>
+          ) : null}
+
+          <View style={styles.inputWrap}>
+            <Ionicons name="mail-outline" size={20} color={Colors.textSecondary} />
+            <TextInput 
+              testID="login-email-input" 
+              style={styles.input} 
+              placeholder="University Email / البريد الجامعي" 
+              value={email} 
+              onChangeText={setEmail} 
+              keyboardType="email-address" 
+              autoCapitalize="none" 
+              placeholderTextColor={Colors.textSecondary}
+              editable={!loading}
+            />
+          </View>
+
+          <View style={styles.inputWrap}>
+            <Ionicons name="lock-closed-outline" size={20} color={Colors.textSecondary} />
+            <TextInput 
+              testID="login-password-input" 
+              style={[styles.input, {flex:1}]} 
+              placeholder="Password / كلمة المرور" 
+              value={password} 
+              onChangeText={setPassword} 
+              secureTextEntry={!showPw} 
+              placeholderTextColor={Colors.textSecondary}
+              editable={!loading}
+            />
+            <TouchableOpacity onPress={() => setShowPw(!showPw)} hitSlop={{top:10,bottom:10,left:10,right:10}} disabled={loading}>
+              <Ionicons name={showPw ? 'eye-off-outline' : 'eye-outline'} size={20} color={Colors.textSecondary} />
+            </TouchableOpacity>
+          </View>
+
+          <TouchableOpacity 
+            testID="login-submit-button" 
+            style={[styles.btn, loading && {opacity:0.7}]} 
+            onPress={handleLogin} 
+            disabled={loading}
+          >
+            {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.btnText}>Sign In / دخول</Text>}
+          </TouchableOpacity>
+
+          <TouchableOpacity testID="go-to-register" style={styles.link} onPress={() => router.push('/register')} disabled={loading}>
+            <Text style={styles.linkText}>
+              Don't have an account? <Text style={styles.linkBold}>Register / إنشاء حساب</Text>
             </Text>
           </TouchableOpacity>
         </View>
-
-        {/* زر الدخول */}
-        <TouchableOpacity
-          style={[styles.button, loading && styles.buttonDisabled]}
-          onPress={handleLogin}
-          disabled={loading}
-        >
-          {loading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={styles.buttonText}>دخول</Text>
-          )}
-        </TouchableOpacity>
-
-        {/* زر دخول المسؤول للاختبار */}
-        <TouchableOpacity
-          style={styles.adminButton}
-          onPress={handleAdminLogin}
-          disabled={loading}
-        >
-          <Text style={styles.adminButtonText}>تسجيل دخول المسؤول (اختبار)</Text>
-        </TouchableOpacity>
-
-        {/* رابط التسجيل الجديد */}
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>ليس لديك حساب؟ </Text>
-          <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-            <Text style={styles.linkText}>إنشاء حساب</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  content: {
-    padding: 20,
-    paddingTop: 40,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: 30,
-    textAlign: 'center',
-    color: '#333',
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    marginBottom: 8,
-    color: '#333',
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 16,
-    backgroundColor: '#fff',
-    fontSize: 14,
-    color: '#333',
-  },
-  passwordContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    backgroundColor: '#fff',
-    marginBottom: 16,
-  },
-  passwordInput: {
-    flex: 1,
-    padding: 12,
-    fontSize: 14,
-    color: '#333',
-  },
-  togglePassword: {
-    paddingRight: 12,
-    fontSize: 18,
-  },
-  button: {
-    backgroundColor: '#007AFF',
-    padding: 14,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  adminButton: {
-    backgroundColor: '#FF6B6B',
-    padding: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  adminButtonText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: 20,
-  },
-  footerText: {
-    color: '#666',
-    fontSize: 14,
-  },
-  linkText: {
-    color: '#007AFF',
-    fontSize: 14,
-    fontWeight: '600',
-  },
+  container: { flex: 1, backgroundColor: Colors.primary },
+  scroll: { flexGrow: 1, justifyContent: 'center', padding: 24 },
+  header: { alignItems: 'center', marginBottom: 32 },
+  logo: { width: 80, height: 80, borderRadius: 20, backgroundColor: 'rgba(212,175,55,0.15)', alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
+  appName: { fontSize: 32, fontWeight: '800', color: '#FFF', letterSpacing: -0.5 },
+  subtitle: { fontSize: 14, color: 'rgba(255,255,255,0.7)', marginTop: 4 },
+  subtitleAr: { fontSize: 14, color: 'rgba(255,255,255,0.5)', marginTop: 2 },
+  card: { backgroundColor: '#FFF', borderRadius: 24, padding: 24, shadowColor: '#000', shadowOffset: {width:0,height:8}, shadowOpacity: 0.1, shadowRadius: 24, elevation: 8 },
+  cardTitle: { fontSize: 20, fontWeight: '700' },
+  errBox: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FEE2E2', padding: 12, borderRadius: 12, marginBottom: 16 },
+  errText: { color: Colors.error, marginLeft: 8, fontSize: 14, flex: 1 },
+  inputWrap: { flexDirection: 'row', alignItems: 'center', backgroundColor: Colors.background, borderWidth: 1, borderColor: Colors.border, borderRadius: 12, paddingHorizontal: 16, marginBottom: 16, height: 56, gap: 12 },
+  input: { flex: 1, fontSize: 16, color: Colors.textPrimary },
+  btn: { backgroundColor: Colors.primary, borderRadius: 12, paddingVertical: 16, alignItems: 'center', marginTop: 8 },
+  btnText: { color: '#FFF', fontSize: 16, fontWeight: '700' },
+  link: { alignItems: 'center', marginTop: 20 },
+  linkText: { fontSize: 14, color: Colors.textSecondary },
+  linkBold: { color: Colors.accent, fontWeight: '700' },
 });
